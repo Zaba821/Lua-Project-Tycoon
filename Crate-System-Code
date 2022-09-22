@@ -1,0 +1,130 @@
+local Crates = 0
+
+while true do
+	wait()
+	if Crates < 14 then
+		local Areas = game.Workspace.Areas:GetChildren()
+		local AreaSpawn = Areas[math.random(1,#Areas)]
+		
+		local Crate = game.ServerStorage.Crates.Gift:Clone()
+		Crate.Name = "Crate"..Crates
+		Crate.Parent = AreaSpawn
+		
+		local x = AreaSpawn.Size.X/2
+		local y = AreaSpawn.Size.Y/2
+		local z = AreaSpawn.Size.Z/2
+		
+		Crate:PivotTo(CFrame.new(AreaSpawn.Position + Vector3.new(math.random(-x, x), math.random(-y, y) + 50, math.random(-z, z))))
+		Crates = Crates + 1
+		
+		Crate.HitBox.Touched:Connect(function(Touch)
+			if Touch.Parent:FindFirstChild("Humanoid") then
+				local Player = game.Players:FindFirstChild(Touch.Parent.Name)
+				if Player:FindFirstChild("InCrate") == nil then
+					local Bool = Instance.new("BoolValue",Player)
+					Bool.Name = "InCrate"
+					Crate:Destroy()
+					
+					local Rewards = {}
+					
+					for i = 1, 45 do
+						local MoneyReward = math.random(1,40)
+						table.insert(Rewards,MoneyReward)
+					end
+					
+					local WinningReward = Rewards[40]
+					
+					local Info = {
+						["Rewards"] = Rewards,
+						["Winner"] = WinningReward,
+						["WinnerID"] = 40
+					}
+					
+					game.ReplicatedStorage.CrateClient:FireClient(Player,WinningReward,Rewards,40)
+					
+					wait(8.5)
+					
+					local DataStoreModule = require(game.ServerScriptService.DataStore.MainModule)
+					local CashDataStore = DataStoreModule("0AiswAg7Wc", Player)
+					
+					CashDataStore:Increment(tonumber(WinningReward),0)
+					
+					Bool:Destroy()
+				end
+			end
+		end)
+		
+		delay(240, function()
+			if Crate then
+				Crate:Destroy()
+				Crates = Crates - 1
+			end
+		end)
+	end
+end
+
+
+
+---------------------------------
+
+
+local template = game.ReplicatedStorage.CrateRewards.Nil
+local tweenService = game:GetService("TweenService")
+
+local crateSizeX = template.AbsoluteSize.X
+local crateGapX = 0.35
+local crateTotalGapX = crateSizeX + crateGapX
+for i = 1, 45 do
+	local crate = template:Clone()
+	crate.Name = "Reward "..i
+	crate.Position = crate.Position + UDim2.new(crateTotalGapX*(i-1), 0, 0, 0)
+	crate.Parent = script.Parent.Main.Holder.HolderMain
+	crate.Visible = true
+end
+
+game.ReplicatedStorage.CrateClient.OnClientEvent:Connect(function(WinningReward,Rewards,WinnerID)
+	for i = 1, 45 do
+		local Crate = script.Parent.Main.Holder.HolderMain:FindFirstChild("Reward "..i)
+
+		Crate.Money.Text = tostring("$"..Rewards[i])
+	end
+
+	script.Parent.Main.Visible = true
+	
+	local CentrePoint = script.Parent.Main.Holder.HolderMain.Position
+	local Crate = script.Parent.Main.Holder.HolderMain:FindFirstChild("Reward "..39).Position
+
+	local landPosition = CentrePoint - Crate
+
+	local tweenTime =4 -- The time the crates will spin for
+	local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Quart) -- The way in which the crates reach their destination (e.g. Quart will make it spin really fast then slow down quite rapidly)
+	local tween = tweenService:Create(script.Parent.Main.Holder.HolderMain, tweenInfo, {Position = landPosition + UDim2.new(-0.02,0,0,0)}) -- landPosition is the position we calculated previously
+	tween:Play()
+	
+	tween.Completed:Wait()
+	print(Rewards[40])
+	script.Parent.Main.Visible = false
+	script.Parent.Main.Holder.HolderMain.Position = CentrePoint
+end)
+
+
+---------------------------
+
+local text = script.Parent
+
+spawn(function()
+	while true do
+		for count = 1,15,1 do wait (0.03)
+			text.Rotation = count
+		end
+		for count = 15,1,-1 do wait (0.03)
+			text.Rotation = count
+		end
+		for count = 1,15,1 do wait (0.03)
+			text.Rotation = count*-1
+		end
+		for count = 15,1,-1 do wait (0.03)
+			text.Rotation = count*-1
+		end
+	end
+end)
