@@ -7,4 +7,7 @@ One of my older but most completed project using lua. Much of the game was coded
 - Random Crate Drop System:
 Coded a randomized crate drop system where an object (crates in this instance) would be placed in random locations through out a map. If a user touches it then it would give that user a random amount of money. Used functions, storage, and a few variables to complete this in a more effecient way.
 
+- MarketPlace GUI and System
+Created a purchase GUI where there would be many clickable buttons, all being able to purchase different amounts of in-game currency. The system was created in a relatively easier way of code by using the "Marketplace Services", which is part of the API exlusive to the Engine.
+
 - 
